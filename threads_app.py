@@ -142,7 +142,7 @@ class ThreadsScraperApp:
         # ---- Header (fixed, does not scroll) ----
         header = tk.Frame(outer, bg=self.colors['bg'])
         header.pack(fill=tk.X, padx=24, pady=(20, 12))
-        ttk.Label(header, text="🧵 Threads Scraper Pro", style='Title.TLabel').pack(anchor=tk.W)
+        ttk.Label(header, text="🧵 Threads Scraper", style='Title.TLabel').pack(anchor=tk.W)
         ttk.Label(header, text="Scrape Threads posts by keyword using the Apify API",
                   style='Subtitle.TLabel').pack(anchor=tk.W, pady=(2, 0))
 
