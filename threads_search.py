@@ -1,4 +1,5 @@
 import argparse
+import csv
 import json
 import os
 import sys
@@ -38,7 +39,7 @@ def main():
     parser.add_argument("--max-posts", type=int, default=20, help="Max posts per search query (default 20)")
     parser.add_argument("--posted-after", default=None, help="ISO date/timestamp (e.g. 2026-05-01)")
     parser.add_argument("--posted-before", default=None, help="ISO date/timestamp (e.g. 2026-06-01)")
-    parser.add_argument("--output", "-o", default="results.json", help="Output file (default results.json)")
+    parser.add_argument("--output", "-o", default="results.csv", help="Output file (default results.csv)")
     args = parser.parse_args()
 
     queries = parse_queries(args.queries)
@@ -60,13 +61,23 @@ def main():
     print(f"Running {ACTOR_ID} for queries: {queries}")
     run = client.actor(ACTOR_ID).call(run_input=run_input)
 
-    if run.get("status") != "SUCCEEDED":
-        sys.exit(f"Run failed with status: {run.get('status')}")
+    # Handle both dict (old apify-client) and object (new apify-client)
+    status = run.get("status") if isinstance(run, dict) else run.status
+    dataset_id = run.get("defaultDatasetId") if isinstance(run, dict) else run.default_dataset_id
+    
+    if status != "SUCCEEDED":
+        sys.exit(f"Run failed with status: {status}")
 
-    items = list(client.dataset(run["defaultDatasetId"]).iterate_items())
-    with open(args.output, "w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=2)
-
+    items = list(client.dataset(dataset_id).iterate_items())
+    
+    # Write to CSV
+    if items:
+        with open(args.output, "w", encoding="utf-8", newline="") as f:
+            fieldnames = list(items[0].keys())
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(items)
+    
     print(f"Saved {len(items)} posts to {args.output}")
 
     print("\n--- Preview (first 10) ---")
