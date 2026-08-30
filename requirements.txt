@@ -1,2 +1,4 @@
 apify-client>=1.7.0
 python-dotenv>=1.0.0
+tkcalendar>=1.6.1
+pyinstaller>=6.0.0
